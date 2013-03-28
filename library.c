@@ -877,7 +877,7 @@ PHPAPI RedisSock* redis_sock_create(char *host, int host_len, unsigned short por
     else if (!strcmp(ini_serializer, INI_REDIS_SERIALIZER_IGBINARY)) {
         redis_sock->serializer = REDIS_SERIALIZER_IGBINARY;
     }
-#ifdef
+#endif
     else {
         redis_sock->serializer = REDIS_SERIALIZER_NONE;
     }
