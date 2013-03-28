@@ -26,7 +26,7 @@ build-stamp:
 	cd $(DEB_SRCDIR) && mv tests/TestRedis.php tests/TestRedis.php.bak && \
 		phpize --clean && mv tests/TestRedis.php.bak tests/TestRedis.php && \
 	        phpize && \
-		./configure --with-php-config=/usr/bin/php-config5
+		./configure --with-php-config=/usr/bin/php-config5 --enable-redis-igbinary
 	$(MAKE) -C $(DEB_SRCDIR)
 
 	touch build-stamp
