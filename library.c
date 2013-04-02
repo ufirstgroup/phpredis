@@ -872,13 +872,14 @@ PHPAPI RedisSock* redis_sock_create(char *host, int host_len, unsigned short por
     ini_serializer = INI_STR("redis.serializer");
     if (!strcmp(ini_serializer, INI_REDIS_SERIALIZER_PHP)) {
         redis_sock->serializer = REDIS_SERIALIZER_PHP;
-    }
+    } else if (!strcmp(ini_serializer, INI_REDIS_SERIALIZER_IGBINARY)) {
 #ifdef HAVE_REDIS_IGBINARY
-    else if (!strcmp(ini_serializer, INI_REDIS_SERIALIZER_IGBINARY)) {
         redis_sock->serializer = REDIS_SERIALIZER_IGBINARY;
-    }
+#else
+        zend_error(E_NOTICE, "phpredis was compiled without support for igbinary. Your INI-Setting `redis.serializer=igbinary` has no effect. Falling back to no serialization.");
+        redis_sock->serializer = REDIS_SERIALIZER_NONE;
 #endif
-    else {
+    } else {
         redis_sock->serializer = REDIS_SERIALIZER_NONE;
     }
 
