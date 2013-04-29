@@ -1,3 +1,10 @@
+php5-redis (2.2.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Updating version from upstream
+
+ -- Michael Ruoss <michael.ruoss@ufirstgroup.com>  Mon, 29 Apr 2013 12:00:21 +0200
+
 php5-redis (2.2.2-1) unstable; urgency=low
 
   * Non-maintainer upload.
