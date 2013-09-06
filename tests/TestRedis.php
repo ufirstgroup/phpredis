@@ -2282,6 +2282,11 @@ class Redis_Test extends TestSuite
 	$this->assertFalse(array(123 => 'x') === $this->redis->hMget('h', array(123)));
 	$this->assertTrue(array(123 => FALSE) === $this->redis->hMget('h', array(123)));
 
+    // Test with an array populated with things we can't use as keys
+    $this->assertTrue($this->redis->hmget('h', Array(false,NULL,false)) === FALSE);
+
+    // Test with some invalid keys mixed in (which should just be ignored)
+    $this->assertTrue(array('x'=>'123','y'=>'456','z'=>'abc') === $this->redis->hMget('h',Array('x',null,'y','','z',false)));
 
 	// hmget/hmset with numeric fields
 	$this->redis->del('h');
