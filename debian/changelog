@@ -2,7 +2,7 @@ php5-redis (2.2.4) unstable; urgency=low
 
   * Updating version from upstream
 
- -- Michael Ruoss <michael.ruoss@ufirstgroup.com>  Fre, 6 Sep 2013 09:12:21 +0200
+ -- Michael Ruoss <michael.ruoss@ufirstgroup.com>  Fri, 6 Sep 2013 09:12:21 +0200
 
 php5-redis (2.2.3) unstable; urgency=low
 
