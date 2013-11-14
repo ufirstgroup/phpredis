@@ -109,7 +109,13 @@ class Redis_Test extends TestSuite
 
 	    // values above 1 are changed to 1 but don't overflow on bits to the right.
 	    $this->assertTrue(0 === $this->redis->setBit('key', 0, 0xff));
-	    $this->assertTrue("\x9f" === $this->redis->get('key'));
+        $this->assertTrue("\x9f" === $this->redis->get('key'));
+
+        // Verify valid offset ranges
+        $this->assertFalse($this->redis->getBit('key', -1));
+        $this->assertFalse($this->redis->getBit('key', 4294967296));
+        $this->assertFalse($this->redis->setBit('key', -1, 1));
+        $this->assertFalse($this->redis->setBit('key', 4294967296, 1));
     }
 
     public function test1000() {
@@ -1127,23 +1133,45 @@ class Redis_Test extends TestSuite
     }
 
     public function testsRandMember() {
-	$this->redis->delete('set0');
-	$this->assertTrue($this->redis->sRandMember('set0') === FALSE);
+        $this->redis->delete('set0');
+        $this->assertTrue($this->redis->sRandMember('set0') === FALSE);
 
-	$this->redis->sAdd('set0', 'val');
-	$this->redis->sAdd('set0', 'val2');
+        $this->redis->sAdd('set0', 'val');
+        $this->redis->sAdd('set0', 'val2');
 
-	$got = array();
-	while(true) {
-	    $v = $this->redis->sRandMember('set0');
-	    $this->assertTrue(2 === $this->redis->sSize('set0')); // no change.
-	    $this->assertTrue($v === 'val' || $v === 'val2');
+        $got = array();
+        while(true) {
+            $v = $this->redis->sRandMember('set0');
+            $this->assertTrue(2 === $this->redis->sSize('set0')); // no change.
+            $this->assertTrue($v === 'val' || $v === 'val2');
 
-	    $got[$v] = $v;
-	    if(count($got) == 2) {
-	        break;
-	    }
-	}
+            $got[$v] = $v;
+            if(count($got) == 2) {
+                break;
+            }
+        }
+
+        // 
+        // With and without count, while serializing
+        // 
+
+        $this->redis->delete('set0');
+        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
+        for($i=0;$i<5;$i++) {
+            $member = "member:$i";
+            $this->redis->sAdd('set0', $member);
+            $mems[] = $member;
+        }
+
+        $member = $this->redis->srandmember('set0');
+        $this->assertTrue(in_array($member, $mems));
+
+        $rmembers = $this->redis->srandmember('set0', $i);
+        foreach($rmembers as $reply_mem) {
+            $this->assertTrue(in_array($reply_mem, $mems));
+        }
+
+        $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);
     }
 
     public function testSRandMemberWithCount() {
