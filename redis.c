@@ -839,7 +839,9 @@ PHP_METHOD(Redis, set) {
 
     /* Our optional argument can either be a long (to support legacy SETEX */
     /* redirection), or an array with Redis >= 2.6.12 set options */
-    if(z_opts && Z_TYPE_P(z_opts) != IS_LONG && Z_TYPE_P(z_opts) != IS_ARRAY) {
+    if(z_opts && Z_TYPE_P(z_opts) != IS_LONG && Z_TYPE_P(z_opts) != IS_ARRAY
+       && Z_TYPE_P(z_opts) != IS_NULL) 
+    {
         RETURN_FALSE;
     }
 
@@ -1331,12 +1333,10 @@ PHP_METHOD(Redis, incrByFloat) {
 		RETURN_FALSE;
 	}
 
-	// Prefix our key, free it if we have
+	// Prefix key, format command, free old key if necissary
 	key_free = redis_key_prefix(redis_sock, &key, &key_len TSRMLS_CC);
+    cmd_len = redis_cmd_format_static(&cmd, "INCRBYFLOAT", "sf", key, key_len, val);
 	if(key_free) efree(key);
-
-	// Format our INCRBYFLOAT command
-	cmd_len = redis_cmd_format_static(&cmd, "INCRBYFLOAT", "sf", key, key_len, val);
 
 	REDIS_PROCESS_REQUEST(redis_sock, cmd, cmd_len);
 	IF_ATOMIC() {

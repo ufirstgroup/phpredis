@@ -264,6 +264,12 @@ class Redis_Test extends TestSuite
         $this->assertTrue($this->redis->set('foo','barbaz', Array('not-valid','nx','invalid','ex'=>200)));
         $this->assertEquals($this->redis->ttl('foo'), 200);
         $this->assertEquals($this->redis->get('foo'), 'barbaz');
+
+        /* Pass NULL as the optional arguments which should be ignored */
+        $this->redis->del('foo');
+        $this->redis->set('foo','bar', NULL);
+        $this->assertEquals($this->redis->get('foo'), 'bar');
+        $this->assertTrue($this->redis->ttl('foo')<0);
     }
 
     public function testGetSet() {
@@ -456,31 +462,41 @@ class Redis_Test extends TestSuite
 
     public function testIncrByFloat()
     {
-	// incrbyfloat is new in 2.6.0
-	if (version_compare($this->version, "2.5.0", "lt")) {
-		$this->markTestSkipped();
-	}
+	    // incrbyfloat is new in 2.6.0
+	    if (version_compare($this->version, "2.5.0", "lt")) {
+            $this->markTestSkipped();
+        }
 
-	$this->redis->delete('key');
+        $this->redis->delete('key');
+        
+        $this->redis->set('key', 0);
 
-	$this->redis->set('key', 0);
+        $this->redis->incrbyfloat('key', 1.5);
+        $this->assertEquals('1.5', $this->redis->get('key'));
 
-	$this->redis->incrbyfloat('key', 1.5);
-	$this->assertEquals('1.5', $this->redis->get('key'));
+        $this->redis->incrbyfloat('key', 2.25);
+        $this->assertEquals('3.75', $this->redis->get('key'));
 
-	$this->redis->incrbyfloat('key', 2.25);
-	$this->assertEquals('3.75', $this->redis->get('key'));
+        $this->redis->incrbyfloat('key', -2.25);
+        $this->assertEquals('1.5', $this->redis->get('key'));
 
-	$this->redis->incrbyfloat('key', -2.25);
-	$this->assertEquals('1.5', $this->redis->get('key'));
+        $this->redis->set('key', 'abc');
 
-	$this->redis->set('key', 'abc');
+        $this->redis->incrbyfloat('key', 1.5);
+        $this->assertTrue("abc" === $this->redis->get('key'));
 
-	$this->redis->incrbyfloat('key', 1.5);
-	$this->assertTrue("abc" === $this->redis->get('key'));
+        $this->redis->incrbyfloat('key', -1.5);
+        $this->assertTrue("abc" === $this->redis->get('key'));
 
-	$this->redis->incrbyfloat('key', -1.5);
-	$this->assertTrue("abc" === $this->redis->get('key'));
+        // Test with prefixing
+        $this->redis->setOption(Redis::OPT_PREFIX, 'someprefix:');
+        $this->redis->del('key');
+        $this->redis->incrbyfloat('key',1.8);
+        $this->assertEquals('1.8', $this->redis->get('key'));
+        $this->redis->setOption(Redis::OPT_PREFIX, '');
+        $this->assertTrue($this->redis->exists('someprefix:key'));
+        $this->redis->del('someprefix:key');
+
     }
 
     public function testDecr()
