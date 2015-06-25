@@ -67,8 +67,10 @@ typedef enum _PUBSUB_TYPE {
 #define INI_REDIS_SERIALIZER_NONE		"none"
 #define INI_REDIS_SERIALIZER_PHP 		"php"
 #define INI_REDIS_SERIALIZER_IGBINARY 	"igbinary"
+
 /* SCAN options */
 #define REDIS_SCAN_NORETRY 0
+#define REDIS_SCAN_RETRY 1
 
 /* GETBIT/SETBIT offset range limits */
 #define BITOP_MIN_OFFSET 0
